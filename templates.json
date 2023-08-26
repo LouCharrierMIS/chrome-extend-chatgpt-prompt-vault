@@ -1,0 +1,22 @@
+[
+  {
+    "name": "Prompt 1",
+    "prompt": "Tell me a story about a brave knight."
+  },
+  {
+    "name": "Prompt 2",
+    "prompt": "Describe a beautiful sunset."
+  },
+  {
+    "name": "Prompt 3",
+    "prompt": "What is your favorite memory?"
+  },
+  {
+    "name": "Prompt 4",
+    "prompt": "Write a poem about the sea."
+  },
+  {
+    "name": "Prompt 5",
+    "prompt": "Imagine you are a bird. What would you do?"
+  }
+]

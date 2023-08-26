@@ -1,19 +1,29 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>chatGPT Prompt Vault</title>
-  <link rel="stylesheet" href="popup.css">
+    <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 <body>
-  <h1>Welcome to chatGPT Prompt Vault</h1>
-  <div id="promptList">
-    <!-- Prompt template list will be populated here -->
-  </div>
-  <div id="promptForm">
-    <textarea id="promptInput" rows="4" cols="50" placeholder="Enter your prompt here"></textarea>
-    <button id="savePromptButton">Save Prompt</button>
-  </div>
-  <script src="popup.js"></script>
+    <h1>chatGPT Prompt Vault</h1>
+    <div id="templateContainer">
+        <h2>Template Prompts</h2>
+        <ul id="templateList"></ul>
+    </div>
+    <div id="userPromptContainer">
+        <h2>Your Prompts</h2>
+        <ul id="userPromptList"></ul>
+    </div>
+    <div id="promptFormContainer">
+        <h2>Edit Prompt</h2>
+        <form id="promptForm">
+            <label for="promptName">Prompt Name:</label><br>
+            <input type="text" id="promptName" name="promptName"><br>
+            <label for="promptText">Prompt Text:</label><br>
+            <textarea id="promptText" name="promptText"></textarea><br>
+            <input type="button" value="Save" onclick="saveUserPrompt()">
+            <input type="button" value="Inject to chatGPT" onclick="injectPrompt()">
+        </form>
+    </div>
+    <script src="popup.js"></script>
 </body>
 </html>
