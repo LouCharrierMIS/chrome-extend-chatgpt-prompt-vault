@@ -1,0 +1,1 @@
+# chrome-extend-chatgpt-prompt-vault
