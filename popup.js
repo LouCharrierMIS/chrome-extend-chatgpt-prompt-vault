@@ -1,67 +1,82 @@
 ```javascript
-// popup.js
+let templatePrompts = [];
+let userPrompts = [];
 
-// Function to retrieve the user's prompts from Chrome Storage
-function getUserPrompts(callback) {
-  chrome.storage.local.get("prompts", function (result) {
-    if (result.prompts) {
-      callback(result.prompts);
-    } else {
-      callback([]);
-    }
-  });
-}
-
-// Function to save the user's prompts to Chrome Storage
-function saveUserPrompts(prompts, callback) {
-  chrome.storage.local.set({ prompts: prompts }, function () {
-    callback();
-  });
-}
-
-// Function to copy the user's prompts from local storage to a remote website
-function copyPromptsToRemoteUrl(url) {
-  getUserPrompts(function (prompts) {
-    // Make a POST request to the remote URL with the prompts data
-    fetch(url, {
-      method: "POST",
-      body: JSON.stringify(prompts),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then(function (response) {
-        if (response.ok) {
-          console.log("Prompts copied to remote URL successfully.");
-        } else {
-          console.error("Failed to copy prompts to remote URL.");
-        }
-      })
-      .catch(function (error) {
-        console.error("An error occurred while copying prompts to remote URL:", error);
-      });
-  });
-}
-
-// Function to inject a prompt into the form at chatGPT web site
-function injectPrompt(prompt) {
-  // Find the form element on the chatGPT web site
-  var form = document.querySelector("form");
-
-  // Set the value of the form input to the prompt
-  form.querySelector("input").value = prompt;
-}
-
-// Example usage of the functions
-getUserPrompts(function (prompts) {
-  console.log("User's prompts:", prompts);
+document.addEventListener('DOMContentLoaded', function() {
+    loadTemplatePrompts();
+    loadUserPrompts();
 });
 
-saveUserPrompts(["Prompt 1", "Prompt 2"], function () {
-  console.log("User's prompts saved.");
+function loadTemplatePrompts() {
+    httpService.get('templates.json')
+        .then(data => {
+            templatePrompts = data;
+            displayTemplatePrompts();
+        });
+}
+
+function displayTemplatePrompts() {
+    const templateList = document.getElementById('templateList');
+    templateList.innerHTML = '';
+    templatePrompts.forEach(prompt => {
+        const li = document.createElement('li');
+        li.textContent = prompt.name;
+        li.dataset.prompt = prompt.prompt;
+        li.addEventListener('click', () => displayPrompt(prompt));
+        templateList.appendChild(li);
+    });
+}
+
+function displayPrompt(prompt) {
+    const promptName = document.getElementById('promptName');
+    const promptText = document.getElementById('promptText');
+    promptName.value = prompt.name;
+    promptText.value = prompt.prompt;
+}
+
+document.getElementById('promptForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    saveUserPrompt();
 });
 
-copyPromptsToRemoteUrl("https://example.com/remote-url");
+function saveUserPrompt() {
+    const promptName = document.getElementById('promptName').value;
+    const promptText = document.getElementById('promptText').value;
+    const prompt = { name: promptName, prompt: promptText };
+    userPrompts.push(prompt);
+    localStorageService.set('userPrompts', userPrompts);
+    loadUserPrompts();
+}
 
-injectPrompt("Example prompt");
+function loadUserPrompts() {
+    userPrompts = localStorageService.get('userPrompts') || [];
+    const userPromptList = document.getElementById('userPromptList');
+    userPromptList.innerHTML = '';
+    userPrompts.forEach(prompt => {
+        const li = document.createElement('li');
+        li.textContent = prompt.name;
+        li.dataset.prompt = prompt.prompt;
+        li.addEventListener('click', () => displayPrompt(prompt));
+        userPromptList.appendChild(li);
+    });
+}
+
+document.getElementById('postPrompts').addEventListener('click', function() {
+    postUserPrompts();
+});
+
+function postUserPrompts() {
+    httpService.post('remoteURL', userPrompts);
+}
+
+document.getElementById('injectPrompt').addEventListener('click', function() {
+    injectPrompt();
+});
+
+function injectPrompt() {
+    const promptText = document.getElementById('promptText').value;
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        chrome.tabs.sendMessage(tabs[0].id, {action: "injectPrompt", prompt: promptText});
+    });
+}
 ```
