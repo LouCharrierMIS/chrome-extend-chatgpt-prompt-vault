@@ -1,82 +1,68 @@
 ```javascript
-let templatePrompts = [];
-let userPrompts = [];
+let userStatus = false;
+let templates = [];
+let myPrompts = [];
 
-document.addEventListener('DOMContentLoaded', function() {
-    loadTemplatePrompts();
-    loadUserPrompts();
-});
+document.getElementById('loginButton').addEventListener('click', checkLoginStatus);
+document.getElementById('logoutButton').addEventListener('click', logout);
 
-function loadTemplatePrompts() {
-    httpService.get('templates.json')
-        .then(data => {
-            templatePrompts = data;
-            displayTemplatePrompts();
-        });
+function checkLoginStatus() {
+  chrome.runtime.sendMessage({message: 'LOGIN_STATUS'}, function(response) {
+    userStatus = response.status;
+    if(userStatus) {
+      fetchPrompts();
+    }
+  });
 }
 
-function displayTemplatePrompts() {
-    const templateList = document.getElementById('templateList');
-    templateList.innerHTML = '';
-    templatePrompts.forEach(prompt => {
-        const li = document.createElement('li');
-        li.textContent = prompt.name;
-        li.dataset.prompt = prompt.prompt;
-        li.addEventListener('click', () => displayPrompt(prompt));
-        templateList.appendChild(li);
-    });
+function fetchPrompts() {
+  chrome.runtime.sendMessage({message: 'FETCH_PROMPTS'}, function(response) {
+    templates = response.templates;
+    myPrompts = response.myPrompts;
+    displayPrompts();
+  });
 }
 
-function displayPrompt(prompt) {
-    const promptName = document.getElementById('promptName');
-    const promptText = document.getElementById('promptText');
-    promptName.value = prompt.name;
-    promptText.value = prompt.prompt;
+function displayPrompts() {
+  const templateList = document.getElementById('templateList');
+  const myPromptList = document.getElementById('myPromptList');
+
+  templates.forEach(prompt => {
+    const li = document.createElement('li');
+    li.textContent = prompt.content;
+    templateList.appendChild(li);
+  });
+
+  myPrompts.forEach(prompt => {
+    const li = document.createElement('li');
+    li.textContent = prompt.content;
+    myPromptList.appendChild(li);
+  });
 }
 
-document.getElementById('promptForm').addEventListener('submit', function(event) {
-    event.preventDefault();
-    saveUserPrompt();
-});
+document.getElementById('editPrompt').addEventListener('input', editPrompt);
 
-function saveUserPrompt() {
-    const promptName = document.getElementById('promptName').value;
-    const promptText = document.getElementById('promptText').value;
-    const prompt = { name: promptName, prompt: promptText };
-    userPrompts.push(prompt);
-    localStorageService.set('userPrompts', userPrompts);
-    loadUserPrompts();
+function editPrompt(e) {
+  const selectedPrompt = e.target.value;
+  document.getElementById('savePrompt').addEventListener('click', function() {
+    savePrompt(selectedPrompt);
+  });
 }
 
-function loadUserPrompts() {
-    userPrompts = localStorageService.get('userPrompts') || [];
-    const userPromptList = document.getElementById('userPromptList');
-    userPromptList.innerHTML = '';
-    userPrompts.forEach(prompt => {
-        const li = document.createElement('li');
-        li.textContent = prompt.name;
-        li.dataset.prompt = prompt.prompt;
-        li.addEventListener('click', () => displayPrompt(prompt));
-        userPromptList.appendChild(li);
-    });
+function savePrompt(prompt) {
+  myPrompts.push(prompt);
+  chrome.runtime.sendMessage({message: 'SAVE_PROMPT', prompt: prompt}, function(response) {
+    if(response.status === 'success') {
+      displayPrompts();
+    }
+  });
 }
 
-document.getElementById('postPrompts').addEventListener('click', function() {
-    postUserPrompts();
-});
-
-function postUserPrompts() {
-    httpService.post('remoteURL', userPrompts);
-}
-
-document.getElementById('injectPrompt').addEventListener('click', function() {
-    injectPrompt();
-});
-
-function injectPrompt() {
-    const promptText = document.getElementById('promptText').value;
-    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, {action: "injectPrompt", prompt: promptText});
-    });
+function logout() {
+  userStatus = false;
+  myPrompts = [];
+  templates = [];
+  document.getElementById('templateList').innerHTML = '';
+  document.getElementById('myPromptList').innerHTML = '';
 }
 ```

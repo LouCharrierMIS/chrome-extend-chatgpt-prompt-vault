@@ -1,29 +1,29 @@
+```html
 <!DOCTYPE html>
 <html>
 <head>
+    <title>PromptVault</title>
     <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 <body>
-    <h1>chatGPT Prompt Vault</h1>
-    <div id="templateContainer">
-        <h2>Template Prompts</h2>
-        <ul id="templateList"></ul>
+    <div id="userStatus">
+        <button id="loginButton">Login</button>
+        <button id="logoutButton" style="display: none;">Logout</button>
     </div>
-    <div id="userPromptContainer">
-        <h2>Your Prompts</h2>
-        <ul id="userPromptList"></ul>
+    <div id="templateList">
+        <h2>Templates</h2>
+        <ul id="templateItems"></ul>
     </div>
-    <div id="promptFormContainer">
+    <div id="myPromptList">
+        <h2>My Prompts</h2>
+        <ul id="myPromptItems"></ul>
+    </div>
+    <div id="editPrompt" style="display: none;">
         <h2>Edit Prompt</h2>
-        <form id="promptForm">
-            <label for="promptName">Prompt Name:</label><br>
-            <input type="text" id="promptName" name="promptName"><br>
-            <label for="promptText">Prompt Text:</label><br>
-            <textarea id="promptText" name="promptText"></textarea><br>
-            <input type="button" value="Save" onclick="saveUserPrompt()">
-            <input type="button" value="Inject to chatGPT" onclick="injectPrompt()">
-        </form>
+        <textarea id="promptContent"></textarea>
+        <button id="savePrompt">Save</button>
     </div>
     <script src="popup.js"></script>
 </body>
 </html>
+```

@@ -1,7 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "chatGPT Prompt Vault",
+  "name": "chatGPT Chrome Extension - PromptVault",
   "version": "1.0",
+  "permissions": ["storage", "activeTab", "scripting"],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
@@ -10,17 +11,12 @@
       "128": "images/icon128.png"
     }
   },
-  "permissions": [
-    "storage",
-    "activeTab",
-    "scripting"
-  ],
   "background": {
     "service_worker": "background.js"
   },
   "content_scripts": [
     {
-      "matches": ["https://*.chatGPT.com/*"],
+      "matches": ["https://chat.openai.com/*"],
       "js": ["contentScript.js"]
     }
   ],

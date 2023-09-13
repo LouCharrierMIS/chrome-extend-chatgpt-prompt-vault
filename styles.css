@@ -5,63 +5,60 @@ body {
     background-color: #f4f4f4;
 }
 
-.container {
-    width: 90%;
-    margin: auto;
-    overflow: hidden;
+#loginButton, #logoutButton {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
 }
 
-ul {
+#templateList, #myPromptList {
     list-style-type: none;
     padding: 0;
+    margin: 0;
 }
 
-li {
-    padding: 10px;
-    border-bottom: 1px solid #ccc;
+#templateList li, #myPromptList li {
+    border: 1px solid #ddd;
+    margin-top: -1px; 
+    background-color: #f6f6f6;
+    padding: 12px;
+    text-decoration: none;
+    font-size: 18px;
+    color: black;
+    display: block
 }
 
-li:last-child {
-    border-bottom: none;
-}
-
-li:hover {
-    background-color: #ddd;
-    cursor: pointer;
-}
-
-#templateList, #userPromptList {
-    margin: 20px 0;
-}
-
-#promptForm {
-    margin-bottom: 20px;
-}
-
-#promptName, #promptText {
+#editPrompt {
     width: 100%;
-    padding: 10px;
-    margin: 10px 0;
+    padding: 12px 20px;
+    margin: 8px 0;
     box-sizing: border-box;
+    border: 3px solid #ccc;
+    -webkit-transition: 0.5s;
+    transition: 0.5s;
+    outline: none;
 }
 
-#promptName {
-    font-size: 1.2em;
+#editPrompt:focus {
+    border: 3px solid #555;
 }
 
-#promptText {
-    height: 100px;
-}
-
-button {
-    background-color: #4CAF50;
-    color: white;
-    padding: 10px 20px;
-    margin: 10px 0;
+#savePrompt {
+    background-color: #008CBA;
     border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
     cursor: pointer;
-}
-
-button:hover {
-    background-color: #45a049;
 }
