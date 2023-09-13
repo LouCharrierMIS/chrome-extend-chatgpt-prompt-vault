@@ -1,51 +1,46 @@
 ```javascript
-import { httpService } from './httpService.js';
-import { localStorageService } from './localStorageService.js';
+import { checkLoginStatus, fetchPrompts, syncPrompts } from './api.js';
+import { savePrompt } from './storage.js';
 
-let templatePrompts = [];
-let userPrompts = [];
+let userStatus = false;
+let templates = [];
+let myPrompts = [];
+
+chrome.runtime.onInstalled.addListener(() => {
+  checkLoginStatus()
+    .then(status => {
+      userStatus = status;
+      chrome.runtime.sendMessage({ type: 'LOGIN_STATUS', payload: userStatus });
+    });
+
+  fetchPrompts()
+    .then(prompts => {
+      templates = prompts.filter(prompt => prompt.owner === 'templates');
+      myPrompts = prompts.filter(prompt => prompt.owner !== 'templates');
+      chrome.storage.local.set({ templates, userPrompts: myPrompts });
+    });
+});
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  switch (request.message) {
-    case 'loadTemplates':
-      loadTemplatePrompts(request.url);
-      break;
-    case 'saveUserPrompt':
-      saveUserPrompt(request.prompt);
-      break;
-    case 'loadUserPrompt':
-      sendResponse({ prompt: loadUserPrompt(request.name) });
-      break;
-    case 'postUserPrompts':
-      postUserPrompts(request.url);
-      break;
-    default:
-      console.error('Unrecognised message: ', request.message);
+  if (request.type === 'FETCH_PROMPTS') {
+    sendResponse({ templates, myPrompts });
+  } else if (request.type === 'SAVE_PROMPT') {
+    const { prompt } = request.payload;
+    myPrompts.push(prompt);
+    savePrompt(prompt);
+    if (userStatus) {
+      syncPrompts(myPrompts);
+    }
+    sendResponse({ success: true });
   }
 });
 
-function loadTemplatePrompts(url) {
-  httpService.get(url)
-    .then(prompts => {
-      templatePrompts = prompts;
-      chrome.runtime.sendMessage({ message: 'templatesLoaded', prompts: templatePrompts });
-    })
-    .catch(error => console.error('Failed to load templates: ', error));
-}
-
-function saveUserPrompt(prompt) {
-  userPrompts.push(prompt);
-  localStorageService.set('userPrompts', userPrompts);
-  chrome.runtime.sendMessage({ message: 'userPromptSaved', prompt: prompt });
-}
-
-function loadUserPrompt(name) {
-  return userPrompts.find(prompt => prompt.name === name);
-}
-
-function postUserPrompts(url) {
-  httpService.post(url, userPrompts)
-    .then(response => chrome.runtime.sendMessage({ message: 'userPromptsPosted', response: response }))
-    .catch(error => console.error('Failed to post user prompts: ', error));
-}
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (changeInfo.url) {
+    chrome.tabs.sendMessage(tabId, {
+      type: 'URL_CHANGE',
+      payload: changeInfo.url,
+    });
+  }
+});
 ```
